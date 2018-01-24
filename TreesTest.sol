@@ -1,7 +1,8 @@
-pragma solidity ^0.4.16;
+pragma solidity 0.4.19;
 /**
 * @title TREES CONTRACT
 * @dev ERC-20 Token Standard Compliant
+* @notice Contact ico@cacaoshares.com
 * @author Fares A. Akel C.
 */
 
