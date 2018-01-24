@@ -1,7 +1,8 @@
-pragma solidity ^0.4.11;
+pragma solidity 0.4.19;
 /**
 * @title Cacao Shares TOKEN
-* @dev ERC-20 Token Standar Compliant
+* @dev ERC-20 Token Standard Compliant
+* @notice Contact ico@cacaoshares.com
 * @author Fares A. Akel C.
 */
 
@@ -28,7 +29,7 @@ library SafeMath {
  */
 contract ERC20TokenInterface {
 
-    function balanceOf(address _owner) public constant returns (uint256 balance);
+    function balanceOf(address _owner) public constant returns (uint256 value);
     function transfer(address _to, uint256 _value) public returns (bool success);
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
     function approve(address _spender, uint256 _value) public returns (bool success);
@@ -120,7 +121,7 @@ contract admined { //This token contract is administered
 * @title Token definition
 * @dev Define token paramters including ERC20 ones
 */
-contract ERC20Token is ERC20TokenInterface, admined { //Standar definition of a ERC20Token
+contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a ERC20Token
     using SafeMath for uint256;
     uint256 public totalSupply;
     mapping (address => uint256) balances; //A mapping of all balances per address
@@ -131,7 +132,7 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standar definition of a 
     * @dev Get the balance of an specified address.
     * @param _owner The address to be query.
     */
-    function balanceOf(address _owner) public constant returns (uint256 balance) {
+    function balanceOf(address _owner) public constant returns (uint256 value) {
       return balances[_owner];
     }
 
@@ -141,8 +142,7 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standar definition of a 
     * @param _value The amount to be transferred.
     */
     function transfer(address _to, uint256 _value) transferLock public returns (bool success) {
-        require(_to != address(0)); //If you dont want that people destroy token
-        require(balances[msg.sender] >= _value);
+        require(_to != address(0)); //Prevent zero address transactions
         require(frozen[msg.sender]==false);
         balances[msg.sender] = balances[msg.sender].sub(_value);
         balances[_to] = balances[_to].add(_value);
@@ -157,8 +157,7 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standar definition of a 
     * @param _value The amount to be transferred.
     */
     function transferFrom(address _from, address _to, uint256 _value) transferLock public returns (bool success) {
-        require(_to != address(0)); //If you dont want that people destroy token
-        require(balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+        require(_to != address(0)); //Prevent zero address transactions
         require(frozen[_from]==false);
         balances[_to] = balances[_to].add(_value);
         balances[_from] = balances[_from].sub(_value);
@@ -173,7 +172,8 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standar definition of a 
     * @param _value The amount to be allowed.
     */
     function approve(address _spender, uint256 _value) public returns (bool success) {
-      allowed[msg.sender][_spender] = _value;
+        require(_value == 0 || allowed[msg.sender][_spender] == 0); //Mitigation to possible attack on approve and transferFrom functions
+        allowed[msg.sender][_spender] = _value;
         Approval(msg.sender, _spender, _value);
         return true;
     }
@@ -193,6 +193,7 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standar definition of a 
     * @param _mintedAmount amount to mint.
     */
     function mintToken(address _target, uint256 _mintedAmount) onlyAdmin supplyLock public {
+        require(_target != address(0)); //Prevent zero address transactions
         balances[_target] = SafeMath.add(balances[_target], _mintedAmount);
         totalSupply = SafeMath.add(totalSupply, _mintedAmount);
         Transfer(0, this, _mintedAmount);
@@ -233,18 +234,25 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standar definition of a 
 /**
 * @title AssetCCS
 * @dev Initial CCS supply creation
+* @notice Initially the supply is locked, if this condition changes any time, a public log will be generated
 */
 contract AssetCCS is ERC20Token {
+    
     string public name = 'Cacao Shares';
     uint8 public decimals = 18;
     string public symbol = 'CCS';
     string public version = '1';
 
     function AssetCCS() public {
+        
         totalSupply = 100000000 * (10**uint256(decimals)); //100 million initial token creation
         balances[msg.sender] = totalSupply;
+
+        setSupplyLock(true);
+    
         Transfer(0, this, totalSupply);
         Transfer(this, msg.sender, balances[msg.sender]);
+    
     }
     
     /**
@@ -253,5 +261,3 @@ contract AssetCCS is ERC20Token {
     function() public {
         revert();
     }
-
-}
