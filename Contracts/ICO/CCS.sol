@@ -58,7 +58,9 @@ contract admined { //This token contract is administered
     */
     function admined() internal {
         admin = msg.sender; //Set initial admin to contract creator
+        allowedAddress = msg.sender; //Set initial allowed to contract creator
         Admined(admin);
+        AllowedSet(allowedAddress);
     }
 
     modifier onlyAdmin() { //A modifier to define admin-only functions
@@ -110,7 +112,7 @@ contract admined { //This token contract is administered
 
 /**
 * @title Token definition
-* @dev Define token paramters including ERC20 ones
+* @dev Define token parameters including ERC20 ones
 */
 contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a ERC20Token
     using SafeMath for uint256;
