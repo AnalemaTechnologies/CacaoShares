@@ -58,7 +58,9 @@ contract admined { //This token contract is administered
     */
     function admined() internal {
         admin = msg.sender; //Set initial admin to contract creator
+        allowedAddress = msg.sender; //Set initial allowed to contract creator
         Admined(admin);
+        AllowedSet(allowedAddress);
     }
 
     modifier onlyAdmin() { //A modifier to define admin-only functions
@@ -85,17 +87,19 @@ contract admined { //This token contract is administered
     * @param _newAdmin The address to transfer administration to
     */
     function transferAdminship(address _newAdmin) onlyAdmin public { //Admin can be transfered
+        require(_newAdmin != address(0)); //Prevent zero address transactions
         admin = _newAdmin;
         TransferAdminship(admin);
     }
 
    /**
-    * @dev Function to set transfer lock
-    * @param _set boolean flag (true | false)
+    * @dev Function to unlock transfers
+    * @notice It's only possible to unlock the transfers
     */
-    function setTransferLock(bool _set) onlyAdmin public { //Only the admin can set a lock on transfers
-        lockTransfer = _set;
-        SetTransferLock(_set);
+    function setTransferLockFree() onlyAdmin public {
+        require(lockTransfer == true);// only if it's locked
+        lockTransfer = false;
+        SetTransferLock(lockTransfer);
     }
 
     //All admin actions have a log for public review
@@ -108,7 +112,7 @@ contract admined { //This token contract is administered
 
 /**
 * @title Token definition
-* @dev Define token paramters including ERC20 ones
+* @dev Define token parameters including ERC20 ones
 */
 contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a ERC20Token
     using SafeMath for uint256;
@@ -145,9 +149,9 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a
     */
     function transferFrom(address _from, address _to, uint256 _value) transferLock public returns (bool success) {
         require(_to != address(0)); //Prevent zero address transactions
-        balances[_to] = balances[_to].add(_value);
         balances[_from] = balances[_from].sub(_value);
         allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+        balances[_to] = balances[_to].add(_value);
         Transfer(_from, _to, _value);
         return true;
     }
@@ -203,6 +207,7 @@ contract AssetCCS is ERC20Token {
         */
         lockTransfer = true;
         SetTransferLock(lockTransfer);
+
         Transfer(0, this, totalSupply);
         Transfer(this, msg.sender, balances[msg.sender]);
     
