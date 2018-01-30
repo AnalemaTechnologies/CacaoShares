@@ -61,15 +61,6 @@ contract admined { //This token contract is administered
         Admined(admin);
     }
 
-   /**
-    * @dev Function to set an allowed address
-    * @param _to The address to give privileges.
-    */
-    function setAllowedAddress(address _to) public {
-        allowedAddress = _to;
-        AllowedSet(_to);
-    }
-
     modifier onlyAdmin() { //A modifier to define admin-only functions
         require(msg.sender == admin);
         _;
@@ -78,6 +69,15 @@ contract admined { //This token contract is administered
     modifier transferLock() { //A modifier to lock transactions
         require(lockTransfer == false || allowedAddress == msg.sender);
         _;
+    }
+
+   /**
+    * @dev Function to set an allowed address
+    * @param _to The address to give privileges.
+    */
+    function setAllowedAddress(address _to) onlyAdmin public {
+        allowedAddress = _to;
+        AllowedSet(_to);
     }
 
    /**
