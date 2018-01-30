@@ -85,6 +85,7 @@ contract admined { //This token contract is administered
     * @param _newAdmin The address to transfer administration to
     */
     function transferAdminship(address _newAdmin) onlyAdmin public { //Admin can be transfered
+        require(_newAdmin != address(0)); //Prevent zero address transactions
         admin = _newAdmin;
         TransferAdminship(admin);
     }
@@ -146,9 +147,9 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a
     */
     function transferFrom(address _from, address _to, uint256 _value) transferLock public returns (bool success) {
         require(_to != address(0)); //Prevent zero address transactions
-        balances[_to] = balances[_to].add(_value);
         balances[_from] = balances[_from].sub(_value);
         allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+        balances[_to] = balances[_to].add(_value);
         Transfer(_from, _to, _value);
         return true;
     }
@@ -204,6 +205,7 @@ contract AssetCCS is ERC20Token {
         */
         lockTransfer = true;
         SetTransferLock(lockTransfer);
+
         Transfer(0, this, totalSupply);
         Transfer(this, msg.sender, balances[msg.sender]);
     
