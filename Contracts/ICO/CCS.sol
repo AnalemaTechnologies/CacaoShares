@@ -203,7 +203,6 @@ contract AssetCCS is ERC20Token {
         */
         lockTransfer = true;
         SetTransferLock(lockTransfer);
-
         Transfer(0, this, totalSupply);
         Transfer(this, msg.sender, balances[msg.sender]);
     
