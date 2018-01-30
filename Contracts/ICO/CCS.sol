@@ -4,10 +4,15 @@ pragma solidity 0.4.19;
 * @dev ERC-20 Token Standard Compliant
 * @notice Contact ico@cacaoshares.com
 * @author Fares A. Akel C.
+* ================================================
+* CACAO SHARES IS A DIGITAL ASSET
+* THAT ENABLES ANYONE TO OWN CACAO TREES
+* OF THE CRIOLLO TYPE IN SUR DEL LAGO, VENEZUELA
+* ================================================
 */
 
 /**
- * @title SafeMath by OpenZeppelin
+ * @title SafeMath by OpenZeppelin (partially)
  * @dev Math operations with safety checks that throw on error
  */
 library SafeMath {
@@ -44,7 +49,6 @@ contract ERC20TokenInterface {
 */
 contract admined { //This token contract is administered
     address public admin; //Admin address is public
-    bool public lockSupply; //Mint and Burn Lock flag
     bool public lockTransfer; //Transfer Lock flag
     address public allowedAddress; //an address that can override lock condition
 
@@ -71,11 +75,6 @@ contract admined { //This token contract is administered
         _;
     }
 
-    modifier supplyLock() { //A modifier to lock mint and burn transactions
-        require(lockSupply == false);
-        _;
-    }
-
     modifier transferLock() { //A modifier to lock transactions
         require(lockTransfer == false || allowedAddress == msg.sender);
         _;
@@ -91,15 +90,6 @@ contract admined { //This token contract is administered
     }
 
    /**
-    * @dev Function to set mint and burn locks
-    * @param _set boolean flag (true | false)
-    */
-    function setSupplyLock(bool _set) onlyAdmin public { //Only the admin can set a lock on supply
-        lockSupply = _set;
-        SetSupplyLock(_set);
-    }
-
-   /**
     * @dev Function to set transfer lock
     * @param _set boolean flag (true | false)
     */
@@ -110,7 +100,6 @@ contract admined { //This token contract is administered
 
     //All admin actions have a log for public review
     event AllowedSet(address _to);
-    event SetSupplyLock(bool _set);
     event SetTransferLock(bool _set);
     event TransferAdminship(address newAdminister);
     event Admined(address administer);
@@ -126,7 +115,6 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a
     uint256 public totalSupply;
     mapping (address => uint256) balances; //A mapping of all balances per address
     mapping (address => mapping (address => uint256)) allowed; //A mapping of all allowances
-    mapping (address => bool) frozen; //A mapping of frozen accounts
 
     /**
     * @dev Get the balance of an specified address.
@@ -143,7 +131,6 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a
     */
     function transfer(address _to, uint256 _value) transferLock public returns (bool success) {
         require(_to != address(0)); //Prevent zero address transactions
-        require(frozen[msg.sender]==false);
         balances[msg.sender] = balances[msg.sender].sub(_value);
         balances[_to] = balances[_to].add(_value);
         Transfer(msg.sender, _to, _value);
@@ -158,7 +145,6 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a
     */
     function transferFrom(address _from, address _to, uint256 _value) transferLock public returns (bool success) {
         require(_to != address(0)); //Prevent zero address transactions
-        require(frozen[_from]==false);
         balances[_to] = balances[_to].add(_value);
         balances[_from] = balances[_from].sub(_value);
         allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
@@ -184,57 +170,19 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a
     * @param _spender The address of the allowed spender.
     */
     function allowance(address _owner, address _spender) public constant returns (uint256 remaining) {
-    return allowed[_owner][_spender];
+        return allowed[_owner][_spender];
     }
-
-    /**
-    * @dev Mint token to an specified address.
-    * @param _target The address of the receiver of the tokens.
-    * @param _mintedAmount amount to mint.
-    */
-    function mintToken(address _target, uint256 _mintedAmount) onlyAdmin supplyLock public {
-        require(_target != address(0)); //Prevent zero address transactions
-        balances[_target] = SafeMath.add(balances[_target], _mintedAmount);
-        totalSupply = SafeMath.add(totalSupply, _mintedAmount);
-        Transfer(0, this, _mintedAmount);
-        Transfer(this, _target, _mintedAmount);
-    }
-
-    /**
-    * @dev Burn token of an specified address.
-    * @param _target The address of the holder of the tokens.
-    * @param _burnedAmount amount to burn.
-    */
-    function burnToken(address _target, uint256 _burnedAmount) onlyAdmin supplyLock public {
-        balances[_target] = SafeMath.sub(balances[_target], _burnedAmount);
-        totalSupply = SafeMath.sub(totalSupply, _burnedAmount);
-        Burned(_target, _burnedAmount);
-    }
-
-    /**
-    * @dev Frozen account.
-    * @param _target The address to being frozen.
-    * @param _flag The status of the frozen
-    */
-    function setFrozen(address _target,bool _flag) onlyAdmin public {
-        frozen[_target]=_flag;
-        FrozenStatus(_target,_flag);
-    }
-
 
     /**
     * @dev Log Events
     */
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-    event Burned(address indexed _target, uint256 _value);
-    event FrozenStatus(address _target,bool _flag);
 }
 
 /**
 * @title AssetCCS
 * @dev Initial CCS supply creation
-* @notice Initially the supply is locked, if this condition changes any time, a public log will be generated
 */
 contract AssetCCS is ERC20Token {
     
@@ -245,11 +193,17 @@ contract AssetCCS is ERC20Token {
 
     function AssetCCS() public {
         
-        totalSupply = 100000000 * (10**uint256(decimals)); //100 million initial token creation
+        totalSupply = 100000000 * (10**uint256(decimals)); //100 million total token creation
         balances[msg.sender] = totalSupply;
 
-        setSupplyLock(true);
-    
+        /**
+        * This token is locked for transfers until the 90th day after ICO ending,
+        * the measure is globally applied, the only address able to transfer is the single
+        * allowed address. During ICO period, allowed address will be ICO address.
+        */
+        lockTransfer = true;
+        SetTransferLock(lockTransfer);
+
         Transfer(0, this, totalSupply);
         Transfer(this, msg.sender, balances[msg.sender]);
     
@@ -261,3 +215,4 @@ contract AssetCCS is ERC20Token {
     function() public {
         revert();
     }
+}
