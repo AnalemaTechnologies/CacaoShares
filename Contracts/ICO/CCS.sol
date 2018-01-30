@@ -29,7 +29,6 @@ library SafeMath {
     }
 
 }
-
 /**
  * Token contract interface for external use
  */
@@ -42,6 +41,7 @@ contract ERC20TokenInterface {
     function allowance(address _owner, address _spender) public constant returns (uint256 remaining);
 
     }
+
 
 /**
 * @title Admin parameters
@@ -96,7 +96,7 @@ contract admined { //This token contract is administered
     function setTransferLockFree() onlyAdmin public {
         require(lockTransfer == true);// only if it's locked
         lockTransfer = false;
-        SetTransferLock(_set);
+        SetTransferLock(lockTransfer);
     }
 
     //All admin actions have a log for public review
