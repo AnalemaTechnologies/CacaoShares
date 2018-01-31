@@ -15,7 +15,9 @@ On this folder are the contracts and documentation related to the token and ICO.
 ### Trees
 On this folder are the smart contracts and documentation related to the trees assignments.
 ## Contract addresses
-**Once contracts are deployed here will be the etherscan addresses to check the verified codes.**
+- CCS token contract address: `0x315cE59FAFd3A8d562b7Ec1C8542382d2710b06c` or `cacaoshares.eth`
+- CCS verified contract: https://etherscan.io/address/0x315ce59fafd3a8d562b7ec1c8542382d2710b06c#code
+- ICO *pending*
 ## Contact Us
 - ico@cacaoshares.com
 - (+81) 808 8895 6702
