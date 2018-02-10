@@ -1,8 +1,14 @@
-pragma solidity ^0.4.18;
+pragma solidity 0.4.19;
 /**
-* @title CACAO SHARES ICO CONTRACT
+* @title ICO CCS SALE CONTRACT
 * @dev ERC-20 Token Standard Compliant
+* @notice Contact ico@cacaoshares.com
 * @author Fares A. Akel C.
+* ================================================
+* CACAO SHARES IS A DIGITAL ASSET
+* THAT ENABLES ANYONE TO OWN CACAO TREES
+* OF THE CRIOLLO TYPE IN SUR DEL LAGO, VENEZUELA
+* ================================================
 */
 
 /**
@@ -50,9 +56,8 @@ contract token {
 
 contract CCSICO {
     using SafeMath for uint256;
-    //This ico have 5 states
+    //This ico have 4 states
     enum State {
-        PreVIP,
         VIP,
         Sale,
         Successful,
@@ -60,9 +65,9 @@ contract CCSICO {
     }
 
     //Public variables
-    State public state = State.PreVIP; //Set initial stage
+    State public state = State.VIP; //Set initial stage
     uint256 public startTime = now; //block-time when it was deployed
-    uint256[3] public rates = [3000,2000,1250];// [PreVIP,VIP,Sale]
+    uint256[3] public rates = [2000,1250];// [PreVIP,VIP,Sale]
     uint256 public hardCap = 50000 ether;
     uint256 public totalRaised; //eth in wei
     uint256 public totalDistributed; //CCS tokens with all 18 decimals
@@ -125,17 +130,13 @@ contract CCSICO {
         contributed[msg.sender] = contributed[msg.sender].add(msg.value);
 
         //Bonuses depends on current state
-        if (state == State.PreVIP){
-
+        if (state == State.VIP){
+        
             tokenBought = tokenBought.mul(rates[0]);
-        
-        } else if (state == State.VIP){
-        
-            tokenBought = tokenBought.mul(rates[1]);
         
         } else { //On Sale state
 
-            tokenBought = tokenBought.mul(rates[2]);
+            tokenBought = tokenBought.mul(rates[1]);
 
         }
 
@@ -154,11 +155,7 @@ contract CCSICO {
     */
     function checkIfFundingCompleteOrExpired() public {
 
-        if(totalDistributed > 200000 * (10 ** 18)){
-         
-            state = State.VIP;
-        
-        } else if(totalDistributed > 1500000 * (10 ** 18)){
+        if(totalDistributed > 1500000 * (10 ** 18)){
         
             state = State.Sale;
         
