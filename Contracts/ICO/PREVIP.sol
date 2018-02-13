@@ -174,6 +174,7 @@ contract PREVIPCCS {
     */
     function calculateTokens(uint256 _amountOfWei) public view returns(uint256) {
         require(_amountOfWei >= 1 szabo);
+        
         uint256 tokenBought; //Variable to store amount of tokens bought
         uint256 tokenPrice = price.USD(0); //1 cent value in wei
 
