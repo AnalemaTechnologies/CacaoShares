@@ -135,7 +135,7 @@ contract PREVIPCCS {
     */
     function contribute() public notFinished payable {
         require(now >= startTime);
-        require(msg.value >= 1 finney);
+        require(msg.value >= 1 szabo);
 
         uint256 tokenBought; //Variable to store amount of tokens bought
         uint256 tokenPrice = price.USD(0); //1 cent value in wei
@@ -148,6 +148,15 @@ contract PREVIPCCS {
         tokenBought = msg.value.div(tokenPrice); //Base 18/ Base 10 = Base 8
         tokenBought = tokenBought.mul(10 **10); //Base 8 to Base 18
         
+        //Discount calculation
+        if (msg.value >= 10 ether){
+            tokenBought = tokenBought.mul(123);
+            tokenBought = tokenBought.div(100); //+10% discount reflected as +23% bonus
+        } else if (msg.value >= 1 ether){
+            tokenBought = tokenBought.mul(11);
+            tokenBought = tokenBought.div(10); //+5% discount reflected as +10% bonus
+        }
+
         totalDistributed = totalDistributed.add(tokenBought); //Save to total tokens distributed
         
         tokenReward.transfer(msg.sender,tokenBought); //Send Tokens
@@ -164,7 +173,7 @@ contract PREVIPCCS {
     * @param _amountOfWei How much ETH you will invest in Wei (1ETH = 10^18 WEI)
     */
     function calculateTokens(uint256 _amountOfWei) public view returns(uint256) {
-        require(_amountOfWei >= 1 finney);
+        require(_amountOfWei >= 1 szabo);
         uint256 tokenBought; //Variable to store amount of tokens bought
         uint256 tokenPrice = price.USD(0); //1 cent value in wei
 
@@ -173,6 +182,15 @@ contract PREVIPCCS {
 
         tokenBought = _amountOfWei.div(tokenPrice); //Base 18/ Base 10 = Base 8
         tokenBought = tokenBought.mul(10 **10); //Base 8 to Base 18
+
+        //Discount calculation
+        if (msg.value >= 10 ether){
+            tokenBought = tokenBought.mul(123);
+            tokenBought = tokenBought.div(100); //+10% discount reflected as +23% bonus
+        } else if (msg.value >= 1 ether){
+            tokenBought = tokenBought.mul(11);
+            tokenBought = tokenBought.div(10); //+5% discount reflected as +10% bonus
+        }
 
         return tokenBought;
 
