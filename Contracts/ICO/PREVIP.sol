@@ -184,10 +184,10 @@ contract PREVIPCCS {
         tokenBought = tokenBought.mul(10 **10); //Base 8 to Base 18
 
         //Discount calculation
-        if (msg.value >= 10 ether){
+        if (_amountOfWei >= 10 ether){
             tokenBought = tokenBought.mul(123);
             tokenBought = tokenBought.div(100); //+10% discount reflected as +23% bonus
-        } else if (msg.value >= 1 ether){
+        } else if (_amountOfWei >= 1 ether){
             tokenBought = tokenBought.mul(11);
             tokenBought = tokenBought.div(10); //+5% discount reflected as +10% bonus
         }
